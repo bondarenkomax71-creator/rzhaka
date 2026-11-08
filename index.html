@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ржака">
+<meta name="theme-color" content="#000000">
+<title>Ржака</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#000;--card:#111;--card2:#1a1a1a;--line:#262626;--tx:#f2f2f2;--mut:#8a8a8a;--acc:#c6ff3d;--acc-tx:#000;--err:#ff5a5a;
+--st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom)}
+:root[data-theme=light]{--bg:#f4f4f1;--card:#fff;--card2:#ececea;--line:#dcdcd8;--tx:#111;--mut:#6b6b6b;--acc:#7bc400;--acc-tx:#000}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]):not([data-theme=light]){--bg:#f4f4f1;--card:#fff;--card2:#ececea;--line:#dcdcd8;--tx:#111;--mut:#6b6b6b;--acc:#7bc400}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0}
+html,body{background:var(--bg);color:var(--tx);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,Arial,sans-serif;height:100%}
+body{overscroll-behavior-y:none}
+button,input,textarea,select{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+header{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(var(--st) + 10px) 16px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;font-weight:800;letter-spacing:-.3px;flex:1}
+header h1 b{color:var(--acc)}
+.icon-btn{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--card2)}
+main{padding:14px 16px calc(var(--sb) + 90px);max-width:640px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.lbl{font-size:13px;color:var(--mut);margin:0 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+textarea,input[type=text],input[type=password]{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:16px;outline:none;resize:none;-webkit-appearance:none}
+textarea:focus,input:focus{border-color:var(--acc)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;margin:0 -14px;padding:0 14px}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrap{flex-wrap:wrap;overflow:visible;margin:0;padding:0}
+.chip{flex:none;padding:8px 13px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-size:14px;white-space:nowrap}
+.chip.on{background:var(--acc);color:var(--acc-tx);border-color:var(--acc);font-weight:600}
+.row{display:flex;gap:8px;align-items:center}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border-radius:16px;background:var(--acc);color:var(--acc-tx);font-weight:700;font-size:17px}
+.btn:disabled{opacity:.5}
+.btn.sec{background:var(--card2);color:var(--tx);font-weight:600;font-size:15px;padding:12px}
+.btn.sm{padding:10px;font-size:14px;border-radius:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid2>*{min-width:0}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.grid3>*{min-width:0}
+.result{position:relative;border-radius:18px;overflow:hidden;background:var(--card2);border:1px solid var(--line);margin-bottom:12px;display:none}
+.result.on{display:block}
+.result img,.result canvas{display:block;width:100%;height:auto}
+.loader{display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;aspect-ratio:1;border-radius:18px;background:var(--card);border:1px solid var(--line);margin-bottom:12px;text-align:center;padding:20px;color:var(--mut)}
+.loader.on{display:flex}
+.spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--acc);animation:sp 0.9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.pick{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;aspect-ratio:4/3;border:2px dashed var(--line);border-radius:18px;color:var(--mut);background:var(--card);width:100%;margin-bottom:12px}
+.pick svg{width:40px;height:40px;color:var(--acc)}
+.prev{position:relative;margin-bottom:12px;display:none}
+.prev.on{display:block}
+.prev img,.prev canvas{width:100%;border-radius:18px;display:block;border:1px solid var(--line)}
+.prev .x{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff}
+.hint{font-size:13px;color:var(--mut);margin-top:8px}
+.err{color:var(--err);font-size:14px;margin:8px 0;display:none}.err.on{display:block}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--bg);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(var(--sb) + 6px)}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mut);padding:6px 0;font-weight:600}
+nav button.on{color:var(--acc)}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;background:var(--card2)}
+.empty{text-align:center;color:var(--mut);padding:50px 20px}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none}
+.sheet-bg.on{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;background:var(--card);border-radius:22px 22px 0 0;padding:10px 16px calc(var(--sb) + 16px);transform:translateY(105%);transition:transform .25s;max-height:90vh;overflow:auto}
+.sheet.on{transform:none}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-size:18px;margin-bottom:12px}
+.mi{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--line);width:100%;text-align:left;font-size:16px}
+.mi:last-child{border:0}
+.viewer{position:fixed;inset:0;z-index:60;background:#000;display:none;flex-direction:column;padding:calc(var(--st) + 8px) 12px calc(var(--sb) + 12px)}
+.viewer.on{display:flex}
+.viewer .vimg{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.viewer img{max-width:100%;max-height:100%;border-radius:12px}
+.viewer .vtop{display:flex;justify-content:space-between;margin-bottom:8px;color:#fff}
+.viewer .vtop .icon-btn{background:#1a1a1a}
+.viewer p{color:#9a9a9a;font-size:13px;margin:8px 0;text-align:center;max-height:3.6em;overflow:hidden}
+.viewer .grid3 .btn{background:#1a1a1a;color:#fff}
+.install{display:none;background:var(--card);border:1px solid var(--acc);border-radius:16px;padding:12px 14px;margin-bottom:12px;font-size:14px;gap:10px;align-items:flex-start}
+.install.on{display:flex}
+.install b{color:var(--acc)}
+.toast{position:fixed;left:50%;bottom:calc(var(--sb) + 86px);transform:translateX(-50%) translateY(20px);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:70;opacity:0;transition:.25s;pointer-events:none;max-width:90%;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.fxcanvas{touch-action:none}
+.seg{display:flex;background:var(--card2);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;padding:8px;border-radius:9px;font-size:14px;color:var(--mut);font-weight:600}
+.seg button.on{background:var(--card);color:var(--tx)}
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+ <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+ <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></symbol>
+ <symbol id="i-face" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M7.5 13.5c1 2.5 2.6 3.5 4.5 3.5s3.5-1 4.5-3.5z"/><path d="M8 9.5l1.5-1 1.5 1M13 9.5l1.5-1 1.5 1"/></symbol>
+ <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></symbol>
+ <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+ <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r=".8"/><circle cx="16" cy="16" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="16" cy="8" r=".8"/><circle cx="8" cy="16" r=".8"/></symbol>
+ <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5L12 3l4.5 4.5"/><path d="M5 11v8a2 2 0 002 2h10a2 2 0 002-2v-8"/></symbol>
+ <symbol id="i-redo" viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.3-5.6"/><path d="M20 4v5h-5"/></symbol>
+ <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+ <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+ <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6"/></symbol>
+ <symbol id="i-wand" viewBox="0 0 24 24"><path d="M4 20L15 9M13 7l4 4"/><path d="M17 3v3M20 6h-3M19.5 13v2M20.5 14h-2M9 3.5v2M10 4.5H8"/></symbol>
+ <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M5 19l1.4-1.4M17.6 6.4L19 5"/></symbol>
+ <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/></symbol>
+ <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+ <symbol id="i-plus" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></symbol>
+</svg>
+
+<header>
+ <h1>Ржа<b>ка</b></h1>
+ <button class="icon-btn" id="menuBtn" aria-label="Меню"><svg><use href="#i-more"/></svg></button>
+</header>
+
+<main>
+ <div class="install" id="installTip">
+  <svg><use href="#i-share"/></svg>
+  <div>Поставь на экран «Домой»: нажми <b>Поделиться</b> внизу Safari → <b>На экран «Домой»</b>. Откроется как приложение.</div>
+  <button id="installX"><svg><use href="#i-x"/></svg></button>
+ </div>
+
+ <!-- СОЗДАТЬ -->
+ <section class="page on" id="p-gen">
+  <div class="loader" id="genLoad"><div class="spin"></div><div id="genLoadTx">Рисую…</div></div>
+  <div class="result" id="genRes"><img id="genImg" alt=""></div>
+  <div class="grid3" id="genActs" style="display:none;margin-bottom:12px">
+   <button class="btn sec sm" data-act="share"><svg><use href="#i-share"/></svg>Сохранить</button>
+   <button class="btn sec sm" data-act="again"><svg><use href="#i-redo"/></svg>Ещё</button>
+   <button class="btn sec sm" data-act="tophoto"><svg><use href="#i-wand"/></svg>Переделать</button>
+  </div>
+  <div class="card">
+   <div class="lbl">Что нарисовать</div>
+   <textarea id="prompt" rows="3" placeholder="Например: кот-бодибилдер жмёт штангу из сосисок"></textarea>
+   <div class="row" style="margin-top:8px">
+    <button class="btn sec sm" id="randBtn" style="width:auto;padding:9px 12px"><svg><use href="#i-dice"/></svg>Случайная ржака</button>
+   </div>
+  </div>
+  <div class="card">
+   <div class="lbl">Стиль</div>
+   <div class="chips" id="styles"></div>
+   <div class="lbl" style="margin-top:14px">Движок</div>
+   <div class="seg" id="engine"><button data-e="hq">Качество</button><button data-e="fast">Безлимит</button></div>
+   <p class="hint" id="engHint"></p>
+   <div class="lbl" style="margin-top:14px">Формат</div>
+   <div class="seg" id="ratio">
+    <button data-r="1:1" class="on">Квадрат</button><button data-r="9:16">Сторис</button><button data-r="16:9">Широкий</button>
+   </div>
+  </div>
+  <div class="err" id="genErr"></div>
+  <button class="btn" id="genBtn"><svg><use href="#i-spark"/></svg>Сгенерировать</button>
+ </section>
+
+ <!-- AI ФОТО -->
+ <section class="page" id="p-ai">
+  <button class="pick" id="aiPick"><svg><use href="#i-plus"/></svg>Выбрать фото или снять</button>
+  <div class="prev" id="aiPrev"><img id="aiSrc" alt=""><button class="icon-btn x" id="aiClear"><svg><use href="#i-x"/></svg></button></div>
+  <div class="loader" id="aiLoad"><div class="spin"></div><div id="aiLoadTx">Переделываю… обычно 20–60 сек</div></div>
+  <div class="result" id="aiRes"><img id="aiImg" alt=""></div>
+  <div class="grid3" id="aiActs" style="display:none;margin-bottom:12px">
+   <button class="btn sec sm" data-act="share"><svg><use href="#i-share"/></svg>Сохранить</button>
+   <button class="btn sec sm" data-act="chain"><svg><use href="#i-redo"/></svg>Ещё раз</button>
+   <button class="btn sec sm" data-act="tofx"><svg><use href="#i-face"/></svg>Приколы</button>
+  </div>
+  <div class="card">
+   <div class="lbl">Как переделать</div>
+   <div class="chips wrap" id="aiPresets"></div>
+   <textarea id="aiPrompt" rows="2" style="margin-top:10px" placeholder="Или своё: сделай его пиратом с попугаем"></textarea>
+   <div class="seg" id="aiReal" style="margin-top:10px"><button data-v="1" class="on">Как живое фото</button><button data-v="0">Как напишу</button></div>
+  </div>
+  <div class="err" id="aiErr"></div>
+  <button class="btn" id="aiBtn"><svg><use href="#i-wand"/></svg>Переделать фото</button>
+  <button class="btn sec" id="aiUnlim" style="display:none;margin-top:10px"><svg><use href="#i-wand"/></svg>Безлимитный редактор</button>
+  <p class="hint">Работают два бесплатных AI-движка по очереди. Когда оба упираются в лимит — жми «Безлимитный редактор»: тот же AI, но с проверкой «я не робот». Вкладка «Приколы» — без лимитов вообще.</p>
+ </section>
+
+ <!-- ПРИКОЛЫ (локально) -->
+ <section class="page" id="p-fx">
+  <button class="pick" id="fxPick"><svg><use href="#i-plus"/></svg>Выбрать фото</button>
+  <div class="prev" id="fxPrev"><canvas id="fxCv" class="fxcanvas"></canvas><button class="icon-btn x" id="fxClear"><svg><use href="#i-x"/></svg></button></div>
+  <div id="fxTools" style="display:none">
+   <div class="card">
+    <div class="lbl">Эффект</div>
+    <div class="chips wrap" id="fxList"></div>
+    <div id="fxStrWrap" style="margin-top:12px">
+     <div class="lbl">Сила</div>
+     <input type="range" id="fxStr" min="10" max="100" value="60">
+    </div>
+    <p class="hint" id="fxHint">Тапни по лицу на фото — туда применится эффект.</p>
+   </div>
+   <div class="card">
+    <div class="lbl">Мем-подпись</div>
+    <input type="text" id="capTop" placeholder="Текст сверху">
+    <input type="text" id="capBot" placeholder="Текст снизу" style="margin-top:8px">
+   </div>
+   <div class="grid3" style="margin-bottom:12px">
+    <button class="btn sec sm" id="fxUndo"><svg><use href="#i-redo"/></svg>Сброс</button>
+    <button class="btn sec sm" id="fxShare"><svg><use href="#i-share"/></svg>Сохранить</button>
+    <button class="btn sec sm" id="fxToAi"><svg><use href="#i-wand"/></svg>В AI</button>
+   </div>
+  </div>
+ </section>
+
+ <!-- МОИ -->
+ <section class="page" id="p-gal">
+  <div class="gal" id="gal"></div>
+  <div class="empty" id="galEmpty">Тут будут все твои картинки.<br>Они хранятся только на телефоне.</div>
+ </section>
+</main>
+
+<nav id="nav">
+ <button class="on" data-p="p-gen"><svg><use href="#i-spark"/></svg>Создать</button>
+ <button data-p="p-ai"><svg><use href="#i-photo"/></svg>AI-фото</button>
+ <button data-p="p-fx"><svg><use href="#i-face"/></svg>Приколы</button>
+ <button data-p="p-gal"><svg><use href="#i-grid"/></svg>Мои</button>
+</nav>
+
+<input type="file" id="file" accept="image/*" hidden>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="menu">
+ <div class="grab"></div>
+ <h3>Меню</h3>
+ <div class="lbl" style="margin-top:4px">Тема</div>
+ <div class="seg" id="themeSeg" style="margin-bottom:10px"><button data-t="auto">Как в системе</button><button data-t="light">Светлая</button><button data-t="dark">Тёмная</button></div>
+ <button class="mi" id="miUnlim"><svg><use href="#i-wand"/></svg><span>Безлимитный AI-редактор</span></button>
+ <button class="mi" id="miKey"><svg><use href="#i-key"/></svg><span>Ключ Hugging Face (больше AI-фото)</span></button>
+ <button class="mi" id="miInstall"><svg><use href="#i-share"/></svg><span>Как поставить на экран «Домой»</span></button>
+ <button class="mi" id="miClear"><svg><use href="#i-trash"/></svg><span>Очистить «Мои»</span></button>
+ <button class="mi" id="miAbout"><svg><use href="#i-info"/></svg><span>О приложении</span></button>
+</div>
+<div class="sheet" id="omniSheet" style="padding-left:0;padding-right:0">
+ <div class="grab"></div>
+ <h3 style="padding:0 16px">Безлимитный редактор</h3>
+ <p class="hint" style="margin:0 16px 10px">Тот же AI, но на его странице: пройди проверку «я не робот», загрузи фото, вставь промпт и жми Generate. Результат: зажми картинку → Сохранить в Фото.</p>
+ <div class="grid2" style="margin:0 16px 10px"><button class="btn sec sm" id="omniCopy"><svg><use href="#i-redo"/></svg>Скопировать промпт</button><button class="btn sec sm" id="omniReload"><svg><use href="#i-x"/></svg>Перезагрузить</button></div>
+ <iframe id="omniFrame" title="AI editor" style="width:100%;height:68vh;border:0;background:#fff;border-radius:12px 12px 0 0" allow="clipboard-write"></iframe>
+</div>
+<div class="sheet" id="keySheet">
+ <div class="grab"></div>
+ <h3>Ключ Hugging Face</h3>
+ <p class="hint" style="margin-bottom:10px">Необязательно. Без ключа AI-фото даёт несколько переделок в день. С бесплатным ключом — больше.<br>1) Зарегайся на huggingface.co (бесплатно)<br>2) Settings → Access Tokens → Create new token → тип <b>Read</b><br>3) Вставь сюда. Ключ хранится только на этом телефоне.</p>
+ <input type="password" id="hfKey" placeholder="hf_..." autocomplete="off">
+ <div class="grid2" style="margin-top:10px"><button class="btn sec" id="keyDel">Удалить</button><button class="btn" id="keySave">Сохранить</button></div>
+</div>
+
+<div class="viewer" id="viewer">
+ <div class="vtop"><button class="icon-btn" id="vClose"><svg><use href="#i-x"/></svg></button><button class="icon-btn" id="vDel"><svg><use href="#i-trash"/></svg></button></div>
+ <div class="vimg"><img id="vImg" alt=""></div>
+ <p id="vTx"></p>
+ <div class="grid3">
+  <button class="btn sm" id="vShare" style="background:var(--acc);color:#000"><svg><use href="#i-share"/></svg>Сохранить</button>
+  <button class="btn sm" id="vAi"><svg><use href="#i-wand"/></svg>AI</button>
+  <button class="btn sm" id="vFx"><svg><use href="#i-face"/></svg>Приколы</button>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const HF_SPACE='https://black-forest-labs-flux-1-kontext-dev.hf.space';
+const OMNI='https://selfit-camera-omni-image-editor.hf.space';
+const HF_GEN='https://black-forest-labs-flux-1-schnell.hf.space';
+function toast(t,ms=2200){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),ms)}
+function show(el,on){el.classList.toggle('on',!!on)}
+
+/* ---------- тема ---------- */
+function applyTheme(t){if(t==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=t;$$('#themeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.t===t))}
+applyTheme(LS.get('theme','dark'));
+$$('#themeSeg button').forEach(b=>b.onclick=()=>{LS.set('theme',b.dataset.t);applyTheme(b.dataset.t)});
+
+/* ---------- навигация ---------- */
+function go(p){$$('.page').forEach(s=>s.classList.toggle('on',s.id===p));$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));window.scrollTo(0,0);if(p==='p-gal')renderGal()}
+$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+
+/* ---------- шторки ---------- */
+function openSheet(id){$$('.sheet').forEach(s=>s.classList.remove('on'));show($('#sheetBg'),1);$(id).classList.add('on')}
+function closeSheets(){show($('#sheetBg'),0);$$('.sheet').forEach(s=>s.classList.remove('on'))}
+$('#sheetBg').onclick=closeSheets;$('#menuBtn').onclick=()=>openSheet('#menu');
+$('#miKey').onclick=()=>{$('#hfKey').value=LS.get('hfKey','');openSheet('#keySheet')};
+$('#keySave').onclick=()=>{const v=$('#hfKey').value.trim();if(v&&!v.startsWith('hf_')){toast('Ключ должен начинаться с hf_');return}LS.set('hfKey',v);closeSheets();toast(v?'Ключ сохранён':'Ключ убран')};
+$('#keyDel').onclick=()=>{LS.set('hfKey','');$('#hfKey').value='';closeSheets();toast('Ключ удалён')};
+$('#miInstall').onclick=()=>{closeSheets();LS.set('noInstall',false);show($('#installTip'),1);go('p-gen')};
+$('#miClear').onclick=async()=>{if(!confirm('Удалить все картинки из «Мои»?'))return;await dbClear();closeSheets();renderGal();toast('Очищено')};
+$('#miAbout').onclick=()=>{closeSheets();alert('Ржака — бесплатный генератор смешных картинок.\n\nКартинки по тексту: FLUX.1 schnell (Hugging Face) и Pollinations.\nAI-переделка фото: FLUX.1 Kontext на Hugging Face.\nПриколы и мемы — прямо на телефоне, без интернета.\n\nВсё хранится только на твоём телефоне.')};
+
+/* ---------- подсказка установки ---------- */
+const standalone=window.navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+if(!standalone&&!LS.get('noInstall',false))show($('#installTip'),1);
+$('#installX').onclick=()=>{show($('#installTip'),0);LS.set('noInstall',true)};
+
+/* ---------- IndexedDB галерея ---------- */
+let _db;
+function db(){return _db||(_db=new Promise((res,rej)=>{const r=indexedDB.open('rzhaka',1);r.onupgradeneeded=()=>r.result.createObjectStore('pics',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))}
+async function tx(mode,fn){const d=await db();return new Promise((res,rej)=>{const t=d.transaction('pics',mode);const st=t.objectStore('pics');const r=fn(st);t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})}
+const dbAdd=p=>tx('readwrite',s=>s.put(p)), dbAll=()=>tx('readonly',s=>s.getAll()), dbDel=id=>tx('readwrite',s=>s.delete(id)), dbClear=()=>tx('readwrite',s=>s.clear());
+async function savePic(blob,text,kind){const p={id:Date.now()+'_'+Math.random().toString(36).slice(2,6),blob,text,kind,ts:Date.now()};try{await dbAdd(p)}catch(e){console.warn(e)}return p}
+let galUrls=[];
+async function renderGal(){galUrls.forEach(URL.revokeObjectURL);galUrls=[];let all=[];try{all=await dbAll()}catch(e){}all.sort((a,b)=>b.ts-a.ts);const g=$('#gal');g.innerHTML='';show($('#galEmpty'),0);$('#galEmpty').style.display=all.length?'none':'block';
+ all.forEach(p=>{const u=URL.createObjectURL(p.blob);galUrls.push(u);const im=new Image();im.src=u;im.loading='lazy';im.onclick=()=>openViewer(p,u);g.appendChild(im)})}
+let vCur=null;
+function openViewer(p,u){vCur=p;$('#vImg').src=u;$('#vTx').textContent=p.text||'';show($('#viewer'),1)}
+$('#vClose').onclick=()=>show($('#viewer'),0);
+$('#vDel').onclick=async()=>{if(!vCur)return;await dbDel(vCur.id);show($('#viewer'),0);renderGal()};
+$('#vShare').onclick=()=>vCur&&shareBlob(vCur.blob);
+$('#vAi').onclick=()=>{if(!vCur)return;show($('#viewer'),0);setAiSource(vCur.blob);go('p-ai')};
+$('#vFx').onclick=()=>{if(!vCur)return;show($('#viewer'),0);loadFx(vCur.blob);go('p-fx')};
+
+/* ---------- сохранение / поделиться ---------- */
+async function shareBlob(blob){
+ const type=blob.type&&blob.type.startsWith('image/')?blob.type:'image/jpeg';
+ let b=blob;
+ if(type!=='image/jpeg'&&type!=='image/png'){b=await toJpeg(blob)} // webp → jpg для iPhone
+ const f=new File([b],'rzhaka_'+Date.now()+(b.type==='image/png'?'.png':'.jpg'),{type:b.type});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});return}catch(e){if(e.name==='AbortError')return}}
+ const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();
+ toast('Если не скачалось — зажми картинку → «Сохранить в Фото»',3500);
+}
+function blobToImg(blob){return new Promise((res,rej)=>{const u=URL.createObjectURL(blob);const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('Не удалось открыть картинку'));i.src=u})}
+async function toJpeg(blob,max=0,q=.92){const i=await blobToImg(blob);let w=i.naturalWidth,h=i.naturalHeight;if(max&&Math.max(w,h)>max){const k=max/Math.max(w,h);w=Math.round(w*k);h=Math.round(h*k)}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h);return new Promise(r=>c.toBlob(r,'image/jpeg',q))}
+
+/* ---------- перевод на английский ---------- */
+const hasRu=s=>/[а-яё]/i.test(s);
+async function toEnglish(s){
+ if(!hasRu(s))return s;
+ const tm=(u,ms=12000)=>{const c=new AbortController();setTimeout(()=>c.abort(),ms);return fetch(u,{signal:c.signal})};
+ try{const r=await tm('https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q='+encodeURIComponent(s));
+  const j=await r.json();const out=j[0].map(x=>x[0]).join('').trim();if(out)return out}catch(e){}
+ try{const r=await tm('https://api.mymemory.translated.net/get?langpair=ru|en&q='+encodeURIComponent(s.slice(0,450)));
+  const j=await r.json();const out=(j.responseData&&j.responseData.translatedText||'').trim();if(out&&!/MYMEMORY|QUERY LENGTH/i.test(out))return out}catch(e){}
+ return s;
+}
+
+/* ---------- СОЗДАТЬ ---------- */
+const STYLES=[
+ ['Мультик','funny cartoon style, bright colors, exaggerated expressions'],
+ ['3D Pixar','3D Pixar style render, cute, expressive, cinematic lighting'],
+ ['Фото','photorealistic photo, shot on a phone camera, natural lighting, highly detailed, funny real-life situation'],
+ ['Комикс','comic book style, bold outlines, halftone, speech bubble vibe'],
+ ['Аниме','anime style, exaggerated funny reaction'],
+ ['Пиксель-арт','pixel art, 16-bit retro game style'],
+ ['Мем','internet meme style, absurd, funny'],
+ ['Пластилин','claymation, plasticine figures, stop motion look'],
+ ['Без стиля','']
+];
+const IDEAS=['бабушка на скейтборде делает трюк в скейтпарке','дед качается в зале с огромной штангой и серьёзным лицом','студент спит на паре лицом в тетради, вокруг все пишут','мужик в костюме банана едет в метро в час пик','кот в маленьких очках сидит за ноутбуком как бухгалтер','гусь в жилетке охранника стоит у входа в Пятёрочку','парень везёт холодильник на самокате по городу','толпа голубей дерётся за шаурму на лавочке','бабушки играют в приставку и орут на диване','собака в шлеме курьера на мотоцикле с коробкой пиццы','мужик жарит шашлык на балконе 9 этажа в снегопад','енот ворует чипсы из открытого рюкзака в автобусе','качок в зале поднимает тележку из магазина','студенты сдают экзамен, а преподаватель спит','кот выбил дверь и злой стоит на пороге','мопс в деловом костюме ведёт совещание в офисе','парень с огромной связкой шаров улетает над двором','бабушка обгоняет спортсменов на марафоне','человек спорит с голубем на остановке','кот-таксист за рулём жёлтой машины'];
+let curStyle=LS.get('style',2),curRatio='1:1',lastGen=null,curEng=LS.get('eng','hq');
+const ENG_HINT={hq:'FLUX на Hugging Face: красивее, но есть дневной лимит. Если лимит кончится — само переключится на «Безлимит».',fast:'Pollinations: попроще, зато без дневного лимита (1 картинка в 45 сек).'};
+function setEng(e){curEng=e;LS.set('eng',e);$$('#engine button').forEach(b=>b.classList.toggle('on',b.dataset.e===e));$('#engHint').textContent=ENG_HINT[e]}
+$$('#engine button').forEach(b=>b.onclick=()=>setEng(b.dataset.e));setEng(curEng);
+const stEl=$('#styles');STYLES.forEach((s,i)=>{const b=document.createElement('button');b.className='chip'+(i===curStyle?' on':'');b.textContent=s[0];b.onclick=()=>{curStyle=i;LS.set('style',i);$$('#styles .chip').forEach((c,j)=>c.classList.toggle('on',j===i))};stEl.appendChild(b)});
+$$('#ratio button').forEach(b=>b.onclick=()=>{curRatio=b.dataset.r;$$('#ratio button').forEach(x=>x.classList.toggle('on',x===b))});
+$('#randBtn').onclick=()=>{$('#prompt').value=IDEAS[Math.floor(Math.random()*IDEAS.length)]};
+const RATIOS={'1:1':[1024,1024],'9:16':[768,1344],'16:9':[1344,768]};
+const COOLDOWN=46000;
+function loadImg(url,ms=120000){return new Promise((res,rej)=>{const i=new Image();let done=false;const t=setTimeout(()=>{if(!done){done=true;i.src='';rej(new Error('timeout'))}},ms);
+ i.onload=()=>{if(done)return;done=true;clearTimeout(t);res(i)};i.onerror=()=>{if(done)return;done=true;clearTimeout(t);rej(new Error('load'))};i.src=url})}
+async function blobVia(url){ // картинку уже сгенерили на телефоне, берём файл из кэша через CORS-прокси
+ const c=new AbortController();setTimeout(()=>c.abort(),30000);
+ const r=await fetch('https://wsrv.nl/?url='+encodeURIComponent(url)+'&output=jpg&q=92',{signal:c.signal});
+ if(!r.ok)throw new Error('proxy '+r.status);const b=await r.blob();if(!b.type.startsWith('image/'))throw new Error('proxy type');return b}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function waitLeft(){return Math.max(0,LS.get('lastGen',0)+COOLDOWN-Date.now())}
+async function countdown(ms,el,prefix){const end=Date.now()+ms;while(Date.now()<end){el.textContent=prefix+' '+Math.ceil((end-Date.now())/1000)+' сек';await sleep(250)}}
+let genBusy=false;
+async function generate(){
+ if(genBusy)return;
+ let ru=$('#prompt').value.trim();
+ if(!ru){ru=IDEAS[Math.floor(Math.random()*IDEAS.length)];$('#prompt').value=ru}
+ genBusy=true;$('#genBtn').disabled=true;show($('#genErr'),0);show($('#genRes'),0);$('#genActs').style.display='none';show($('#genLoad'),1);
+ const [w,h]=RATIOS[curRatio];$('#genLoad').style.aspectRatio=w+'/'+h;
+ try{
+  $('#genLoadTx').textContent='Понимаю идею…';
+  const en=await toEnglish(ru);
+  const style=STYLES[curStyle][1];
+  const full=(style?style+', ':'')+'funny humorous image: '+en;
+  if(curEng==='hq'){
+   try{
+    $('#genLoadTx').textContent='Рисую… 5–20 сек';
+    const out=await hfCall(HF_GEN,'infer',[full,0,true,w,h,4],st=>{if(st)$('#genLoadTx').textContent=st;else $('#genLoadTx').textContent='Рисую… 5–20 сек'},120000);
+    const jpg=await toJpeg(out,0,.92);
+    lastGen=await savePic(jpg,ru,'gen');$('#genImg').src=URL.createObjectURL(jpg);await $('#genImg').decode().catch(()=>{});
+    show($('#genRes'),1);$('#genActs').style.display='grid';$('#genRes').scrollIntoView({behavior:'smooth',block:'start'});return;
+   }catch(e){if(e.name!=='AbortError'&&/лимит/.test(e.message)){setEng('fast');toast('Лимит «Качества» на сегодня кончился — включил «Безлимит»',3500)}else toast('«Качество» не ответило — рисую через «Безлимит»',3000)}
+  }
+  let img=null,url='';
+  for(let attempt=0;attempt<3&&!img;attempt++){
+   const left=waitLeft();
+   if(left>0)await countdown(left,$('#genLoadTx'),'Бесплатно — 1 картинка в 45 сек. Начну через');
+   $('#genLoadTx').textContent=attempt?'Пробую ещё раз…':'Рисую… 5–20 сек';
+   url='https://image.pollinations.ai/prompt/'+encodeURIComponent(full)+`?width=${w}&height=${h}&seed=${Math.floor(Math.random()*2e9)}&model=flux&nologo=true`;
+   LS.set('lastGen',Date.now());
+   try{img=await loadImg(url)}catch(e){if(e.message==='timeout'&&attempt>=1)throw e}
+  }
+  if(!img)throw new Error('сервер не отдал картинку');
+  let blob=null;try{blob=await blobVia(url)}catch(e){try{blob=await blobVia(url)}catch(e2){}}
+  lastGen=blob?await savePic(blob,ru,'gen'):{blob:null,url,text:ru};
+  $('#genImg').src=blob?URL.createObjectURL(blob):url;
+  await $('#genImg').decode().catch(()=>{});
+  show($('#genRes'),1);$('#genActs').style.display='grid';
+  $('#genRes').scrollIntoView({behavior:'smooth',block:'start'});
+ }catch(e){$('#genErr').textContent='Не получилось: '+(e.message==='timeout'?'сервер долго думает, попробуй ещё раз':e.message)+'.';show($('#genErr'),1)}
+ finally{show($('#genLoad'),0);genBusy=false;$('#genBtn').disabled=false}
+}
+$('#genBtn').onclick=generate;
+$('#genActs').onclick=e=>{const a=e.target.closest('[data-act]');if(!a||!lastGen)return;const act=a.dataset.act;
+ if(act==='again'){generate();return}
+ if(!lastGen.blob){toast('Зажми картинку пальцем → «Сохранить в Фото»',3500);return}
+ if(act==='share')shareBlob(lastGen.blob);if(act==='tophoto'){setAiSource(lastGen.blob);go('p-ai')}};
+
+/* ---------- AI-ФОТО ---------- */
+const KEEP=' Keep the exact same face identity, expression, hairstyle, clothing, background and lighting. Photorealistic, looks like a real unedited photo.';
+const PRESETS=[
+ ['Толстяк','Make this person very fat with chubby cheeks, a double chin and a big belly.'+KEEP],
+ ['Качок','Make this person a huge bodybuilder with enormous muscles in a tight tank top.'+KEEP],
+ ['Дед 80 лет','Make this person look 85 years old with deep wrinkles, grey thin hair and age spots.'+KEEP],
+ ['Младенец','Turn this person into a chubby toddler with the same facial features and expression.'+KEEP],
+ ['Лысый','Make this person completely bald with a shiny head.'+KEEP],
+ ['Усы','Give this person a huge ridiculous handlebar mustache.'+KEEP],
+ ['Клоун','Give this person clown makeup, a red clown nose and a colorful clown wig.'+KEEP],
+ ['Пират','Dress this person as a pirate with an eye patch, pirate hat and a parrot on the shoulder.'+KEEP],
+ ['Король','Dress this person as a king with a golden crown and a royal red robe.'+KEEP],
+ ['Рыцарь','Dress this person as a medieval knight in shining armor.'+KEEP],
+ ['Банан','Dress this person in a full yellow banana costume.'+KEEP],
+ ['Космонавт','Put this person in a white space suit standing on the moon.'+KEEP],
+ ['Бомж','Make this person look like a homeless man with dirty torn clothes and a messy beard.'+KEEP],
+ ['Блондин','Give this person long bright blonde hair.'+KEEP],
+ ['Зубы','Give this person huge funny buck teeth.'+KEEP],
+ ['Загар','Give this person an extremely dark orange spray tan.'+KEEP],
+ ['Симпсоны','Redraw this photo in The Simpsons cartoon style with yellow skin, keep the person recognizable.'],
+ ['Pixar 3D','Turn this person into a 3D Pixar animated movie character, keep them recognizable.'],
+ ['Аниме','Redraw this photo in anime style, keep the person recognizable.'],
+ ['Лего','Turn this person into a LEGO minifigure in a LEGO world.'],
+ ['Зомби','Turn this person into a realistic horror movie zombie, keep the face recognizable.'],
+ ['Котик','Turn this person into a realistic cat with the same expression, pose and clothing.'],
+];
+let aiBlob=null,aiPreset=-1,aiLast=null,aiReal=true;
+$$('#aiReal button').forEach(b=>b.onclick=()=>{aiReal=b.dataset.v==='1';$$('#aiReal button').forEach(x=>x.classList.toggle('on',x===b))});
+const prEl=$('#aiPresets');PRESETS.forEach((p,i)=>{const b=document.createElement('button');b.className='chip';b.textContent=p[0];b.onclick=()=>{aiPreset=aiPreset===i?-1:i;$$('#aiPresets .chip').forEach((c,j)=>c.classList.toggle('on',j===aiPreset));if(aiPreset>=0)$('#aiPrompt').value=''};prEl.appendChild(b)});
+$('#aiPrompt').oninput=()=>{if($('#aiPrompt').value.trim()){aiPreset=-1;$$('#aiPresets .chip').forEach(c=>c.classList.remove('on'))}};
+let pickTarget='ai';
+$('#aiPick').onclick=()=>{pickTarget='ai';$('#file').click()};
+$('#fxPick').onclick=()=>{pickTarget='fx';$('#file').click()};
+$('#file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+ try{const b=await toJpeg(f,1600,.9);if(pickTarget==='ai')setAiSource(b);else loadFx(b)}catch(err){toast('Не получилось открыть фото')}};
+function setAiSource(blob){aiBlob=blob;$('#aiSrc').src=URL.createObjectURL(blob);show($('#aiPrev'),1);$('#aiPick').style.display='none';show($('#aiRes'),0);$('#aiActs').style.display='none';show($('#aiErr'),0)}
+$('#aiClear').onclick=()=>{aiBlob=null;show($('#aiPrev'),0);$('#aiPick').style.display='flex';show($('#aiRes'),0);$('#aiActs').style.display='none'};
+
+function hfHeaders(json){const h={};const k=LS.get('hfKey','');if(k)h.Authorization='Bearer '+k;if(json)h['Content-Type']='application/json';return h}
+async function hfCall(space,fn,data,onStatus,ms=240000){
+ let r=await fetch(space+'/gradio_api/call/'+fn,{method:'POST',headers:hfHeaders(true),body:JSON.stringify({data})});
+ if(!r.ok)throw new Error('AI-сервер занят ('+r.status+')');
+ const {event_id}=await r.json();
+ onStatus&&onStatus('В очереди…');
+ const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),ms);
+ try{
+  r=await fetch(space+'/gradio_api/call/'+fn+'/'+event_id,{headers:hfHeaders(),signal:ctl.signal});
+  const reader=r.body.getReader();const dec=new TextDecoder();let buf='',ev='';
+  while(true){const {value,done}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});
+   let i;while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+    if(line.startsWith('event:')){ev=line.slice(6).trim();if(ev==='generating'||ev==='heartbeat')onStatus&&onStatus(null)}
+    else if(line.startsWith('data:')){const d=line.slice(5).trim();
+     if(ev==='complete'){const arr=JSON.parse(d);const url=arr[0].url||(space+'/gradio_api/file='+arr[0].path);
+      const ir=await fetch(url,{headers:hfHeaders()});if(!ir.ok)throw new Error('Не удалось скачать результат');return await ir.blob()}
+     if(ev==='error'){let msg='';try{const j=JSON.parse(d);msg=(j&&(j.error||j.message))||''}catch(e){msg=d}const qe=new Error(quotaMsg(msg));qe.limit=/quota|GPU|limit|exceeded/i.test(msg)||!msg||msg==='null';throw qe}
+    }}
+  }
+  throw new Error('Связь оборвалась, попробуй ещё раз');
+ }finally{clearTimeout(t)}
+}
+async function hfEdit(blob,prompt,onStatus){
+ const jpg=await toJpeg(blob,1024,.9);
+ const fd=new FormData();fd.append('files',jpg,'photo.jpg');
+ onStatus('Загружаю фото…');
+ const r=await fetch(HF_SPACE+'/gradio_api/upload',{method:'POST',body:fd,headers:hfHeaders()});
+ if(!r.ok)throw new Error('AI-сервер недоступен ('+r.status+')');
+ const path=(await r.json())[0];
+ return hfCall(HF_SPACE,'infer',[{path,meta:{_type:'gradio.FileData'}},prompt,0,true,2.5,24],st=>onStatus(st||'Переделываю… обычно 20–60 сек'));
+}
+async function fetchImgAny(url){
+ try{const r=await fetch(url);if(r.ok){const b=await r.blob();if(b.size>1000&&/image/.test(b.type))return b}}catch(e){}
+ const r=await fetch('https://wsrv.nl/?url='+encodeURIComponent(url)+'&output=jpg&q=92');if(!r.ok)throw new Error('Не удалось скачать результат');return await r.blob()
+}
+function verifyErr(){const e=new Error('verify');e.verify=true;return e}
+async function omniEdit(blob,prompt,onStatus){
+ const pol=await fetch(OMNI+'/gradio_api/run/verification_policy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:['image_edit']})});
+ if(!pol.ok)throw new Error('omni '+pol.status);
+ if((await pol.json()).data[0]!==false)throw verifyErr();
+ const jpg=await toJpeg(blob,1024,.9);
+ const fd=new FormData();fd.append('files',jpg,'photo.jpg');
+ onStatus('Загружаю фото…');
+ const up=await fetch(OMNI+'/gradio_api/upload',{method:'POST',body:fd});if(!up.ok)throw new Error('omni up '+up.status);
+ const path=(await up.json())[0];
+ const sh=Math.random().toString(36).slice(2)+Date.now().toString(36);
+ const file={path,url:OMNI+'/gradio_api/file='+path,orig_name:'photo.jpg',mime_type:'image/jpeg',meta:{_type:'gradio.FileData'}};
+ const j=await fetch(OMNI+'/gradio_api/queue/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:[file,prompt,''],fn_index:6,session_hash:sh,trigger_id:16})});
+ if(!j.ok)throw new Error('omni join '+j.status);
+ onStatus('Переделываю… обычно 10–20 сек');
+ const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),180000);
+ try{
+  const r=await fetch(OMNI+'/gradio_api/queue/data?session_hash='+sh,{signal:ctl.signal});
+  const reader=r.body.getReader();const dec=new TextDecoder();let buf='';
+  while(true){const {value,done}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});
+   let i;while((i=buf.indexOf('\n'))>=0){const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+    if(!line.startsWith('data:'))continue;let d;try{d=JSON.parse(line.slice(5))}catch(e){continue}
+    if(d.msg==='process_completed'){
+     if(d.success===false||!d.output||!d.output.data){const m=String((d.output&&d.output.error)||'');if(/verif/i.test(m))throw verifyErr();throw new Error(m||'omni fail')}
+     const m=/src=['"]([^'"]+)['"]/.exec(String(d.output.data[0]||''));
+     if(!m)throw new Error(String(d.output.data[2]||'omni: нет картинки'));
+     onStatus('Скачиваю результат…');return await fetchImgAny(m[1])}
+    if(d.msg==='unexpected_error'||d.msg==='error')throw new Error(d.message||'omni error');
+   }}
+  throw new Error('Связь оборвалась, попробуй ещё раз');
+ }finally{clearTimeout(t)}
+}
+let omniPrompt='';
+function openOmni(){const f=$('#omniFrame');if(!f.src)f.src=OMNI;openSheet('#omniSheet')}
+$('#omniReload').onclick=()=>{$('#omniFrame').src=OMNI};
+$('#omniCopy').onclick=async()=>{if(!omniPrompt){toast('Сначала выбери вариант или напиши промпт');return}try{await navigator.clipboard.writeText(omniPrompt);toast('Промпт скопирован — вставь в поле Prompt')}catch(e){prompt('Скопируй промпт:',omniPrompt)}};
+$('#miUnlim').onclick=()=>{closeSheets();setTimeout(openOmni,50)};
+$('#aiUnlim').onclick=openOmni;
+function quotaMsg(m){m=String(m||'');if(/quota|GPU|limit|exceeded/i.test(m))return 'лимит этого движка на сегодня. Открой «Безлимитный редактор» ниже, либо добавь бесплатный ключ в меню «⋯»';if(!m||m==='null')return 'лимит GPU этого движка на сегодня. Открой «Безлимитный редактор» ниже, либо добавь бесплатный ключ в меню «⋯»';return m}
+let aiBusy=false;
+async function aiRun(srcBlob){
+ if(aiBusy)return;
+ const src=srcBlob||aiBlob;if(!src){toast('Сначала выбери фото');return}
+ let ru=$('#aiPrompt').value.trim();let en;
+ if(!ru&&aiPreset<0){toast('Выбери вариант или напиши, что сделать');return}
+ aiBusy=true;$('#aiBtn').disabled=true;show($('#aiErr'),0);show($('#aiRes'),0);$('#aiActs').style.display='none';show($('#aiLoad'),1);
+ $('#aiLoad').scrollIntoView({behavior:'smooth',block:'center'});
+ try{
+  if(ru){$('#aiLoadTx').textContent='Понимаю задачу…';en=(await toEnglish(ru))+(aiReal?KEEP:'')}else{en=PRESETS[aiPreset][1];ru=PRESETS[aiPreset][0]}
+  omniPrompt=en;$('#aiUnlim').style.display='none';
+  const st=s=>$('#aiLoadTx').textContent=s;let out=null,lim=false;
+  try{out=await omniEdit(src,en,st)}catch(e){lim=!!e.verify;console.warn('omni:',e.message)}
+  if(!out){st('Переделываю… обычно 20–60 сек');try{out=await hfEdit(src,en,st)}catch(e){if(e.limit||lim){const le=new Error(lim&&e.limit?'оба бесплатных движка упёрлись в лимит. Открой «Безлимитный редактор» ниже — там тот же AI, только с проверкой «я не робот»':e.message);le.limit=true;throw le}throw e}}
+  const jpg=await toJpeg(out,0,.92);
+  aiLast=await savePic(jpg,'AI: '+ru,'ai');
+  $('#aiImg').src=URL.createObjectURL(jpg);await $('#aiImg').decode().catch(()=>{});
+  show($('#aiRes'),1);$('#aiActs').style.display='grid';$('#aiRes').scrollIntoView({behavior:'smooth',block:'start'});
+ }catch(e){$('#aiErr').textContent='Не получилось: '+(e.name==='AbortError'?'слишком долго, сервер занят':(e.message==='Failed to fetch'||e.message==='Load failed'?'нет связи с AI-сервером (попробуй с VPN или другой сетью)':e.message));show($('#aiErr'),1);if(e.limit)$('#aiUnlim').style.display='flex'}
+ finally{show($('#aiLoad'),0);aiBusy=false;$('#aiBtn').disabled=false}
+}
+$('#aiBtn').onclick=()=>aiRun();
+$('#aiActs').onclick=e=>{const a=e.target.closest('[data-act]');if(!a||!aiLast)return;const act=a.dataset.act;
+ if(act==='share')shareBlob(aiLast.blob);
+ if(act==='chain'){setAiSource(aiLast.blob);toast('Результат стал исходником — выбери, что ещё сделать')}
+ if(act==='tofx'){loadFx(aiLast.blob);go('p-fx')}};
+
+/* ---------- ПРИКОЛЫ (на телефоне) ---------- */
+const FX=[
+ ['Пузырь','bulge',1],['Сжать','pinch',1],['Вихрь','swirl',1],['Большие глаза','eyes',0],
+ ['Широкий','wide',0],['Длинный','tall',0],['Зеркало','mirror',0],['Жарка','fried',0],['Без эффекта','none',0]
+];
+let fxBase=null,fxKind='bulge',fxCx=.5,fxCy=.42,fxEyes=null;
+const fxCv=$('#fxCv'),fxCtx=fxCv.getContext('2d',{willReadFrequently:true});
+const fxL=$('#fxList');FX.forEach((f,i)=>{const b=document.createElement('button');b.className='chip'+(f[1]===fxKind?' on':'');b.textContent=f[0];b.onclick=()=>{fxKind=f[1];$$('#fxList .chip').forEach((c,j)=>c.classList.toggle('on',j===i));updHint();renderFx()};fxL.appendChild(b)});
+function updHint(){const f=FX.find(x=>x[1]===fxKind);$('#fxHint').textContent=fxKind==='eyes'?'Тапни по одному глазу, потом по второму.':f[2]?'Тапни по лицу на фото — туда применится эффект.':'';$('#fxStrWrap').style.display=fxKind==='none'||fxKind==='mirror'?'none':'block'}
+async function loadFx(blob){const i=await blobToImg(blob);let w=i.naturalWidth,h=i.naturalHeight;const k=Math.min(1,1200/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);
+ const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(i,0,0,w,h);fxBase=c;fxCx=.5;fxCy=.42;fxEyes=null;
+ show($('#fxPrev'),1);$('#fxPick').style.display='none';$('#fxTools').style.display='block';updHint();renderFx()}
+$('#fxClear').onclick=()=>{fxBase=null;show($('#fxPrev'),0);$('#fxPick').style.display='flex';$('#fxTools').style.display='none'};
+$('#fxUndo').onclick=()=>{fxKind='none';$$('#fxList .chip').forEach((c,j)=>c.classList.toggle('on',FX[j][1]==='none'));$('#capTop').value='';$('#capBot').value='';fxEyes=null;updHint();renderFx()};
+fxCv.addEventListener('pointerdown',e=>{if(!fxBase)return;const r=fxCv.getBoundingClientRect();const x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+ if(fxKind==='eyes'){if(!fxEyes||fxEyes.length>=2)fxEyes=[];fxEyes.push([x,y])}else{fxCx=x;fxCy=y}renderFx()});
+let fxT;$('#fxStr').oninput=()=>{cancelAnimationFrame(fxT);fxT=requestAnimationFrame(renderFx)};
+$('#capTop').oninput=$('#capBot').oninput=()=>{cancelAnimationFrame(fxT);fxT=requestAnimationFrame(renderFx)};
+function warp(src,dst,w,h,map){ // map(x,y) -> [sx,sy]
+ const s=src.data,d=dst.data;
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){const m=map(x,y);let sx=m[0],sy=m[1];
+  sx=sx<0?0:sx>w-1?w-1:sx;sy=sy<0?0:sy>h-1?h-1:sy;
+  const x0=sx|0,y0=sy|0,x1=Math.min(x0+1,w-1),y1=Math.min(y0+1,h-1),fx=sx-x0,fy=sy-y0;
+  const i00=(y0*w+x0)*4,i10=(y0*w+x1)*4,i01=(y1*w+x0)*4,i11=(y1*w+x1)*4,o=(y*w+x)*4;
+  for(let c=0;c<4;c++)d[o+c]=(s[i00+c]*(1-fx)+s[i10+c]*fx)*(1-fy)+(s[i01+c]*(1-fx)+s[i11+c]*fx)*fy}
+}
+function radial(cx,cy,R,fn){return (x,y)=>{const dx=x-cx,dy=y-cy,d=Math.sqrt(dx*dx+dy*dy);if(d>=R)return [x,y];return fn(dx,dy,d/R,cx,cy,x,y)}}
+function renderFx(){
+ if(!fxBase)return;const w=fxBase.width,h=fxBase.height;const S=$('#fxStr').value/100;
+ fxCv.width=w;fxCv.height=h;fxCtx.drawImage(fxBase,0,0);
+ const k=fxKind;
+ if(['bulge','pinch','swirl','eyes'].includes(k)){
+  const src=fxCtx.getImageData(0,0,w,h),dst=fxCtx.createImageData(w,h);const m=Math.min(w,h);
+  let map;
+  if(k==='bulge'){const R=m*(.25+.25*S),a=.4+1.6*S;map=radial(fxCx*w,fxCy*h,R,(dx,dy,r,cx,cy)=>{const f=Math.pow(r,a)/r||0;return [cx+dx*f,cy+dy*f]})}
+  if(k==='pinch'){const R=m*(.25+.25*S),a=1/(1+1.5*S);map=radial(fxCx*w,fxCy*h,R,(dx,dy,r,cx,cy)=>{const f=Math.pow(r,a)/r||0;return [cx+dx*f,cy+dy*f]})}
+  if(k==='swirl'){const R=m*(.2+.3*S),ang=S*6;map=radial(fxCx*w,fxCy*h,R,(dx,dy,r,cx,cy)=>{const t=ang*(1-r)*(1-r),c=Math.cos(t),s=Math.sin(t);return [cx+dx*c-dy*s,cy+dx*s+dy*c]})}
+  if(k==='eyes'){const pts=(fxEyes&&fxEyes.length?fxEyes:[]);if(!pts.length){fxCtx.putImageData(src,0,0);drawCaps(w,h);return}
+   const R=m*(.06+.08*S),a=.3+1.5*S;
+   map=(x,y)=>{for(const p of pts){const cx=p[0]*w,cy=p[1]*h,dx=x-cx,dy=y-cy,d=Math.sqrt(dx*dx+dy*dy);if(d<R){const r=d/R,f=Math.pow(r,a)/r||0;return [cx+dx*f,cy+dy*f]}}return [x,y]}}
+  warp(src,dst,w,h,map);fxCtx.putImageData(dst,0,0);
+ }
+ if(k==='wide'||k==='tall'){const f=1+S*.9;fxCtx.clearRect(0,0,w,h);
+  if(k==='wide'){const sw=w/f;fxCtx.drawImage(fxBase,(w-sw)/2,0,sw,h,0,0,w,h)}else{const sh=h/f;fxCtx.drawImage(fxBase,0,(h-sh)/2,w,sh,0,0,w,h)}}
+ if(k==='mirror'){fxCtx.save();fxCtx.translate(w,0);fxCtx.scale(-1,1);fxCtx.drawImage(fxBase,0,0,w/2,h,0,0,w/2,h);fxCtx.restore()}
+ if(k==='fried'){const id=fxCtx.getImageData(0,0,w,h),d=id.data;const con=1+S*1.8,sat=1+S*2.5;
+  for(let i=0;i<d.length;i+=4){let r=d[i],g=d[i+1],b=d[i+2];const l=.3*r+.59*g+.11*b;r=l+(r-l)*sat;g=l+(g-l)*sat;b=l+(b-l)*sat;
+   r=(r-128)*con+128+20*S;g=(g-128)*con+128;b=(b-128)*con+128-30*S;const n=(Math.random()-.5)*60*S;d[i]=r+n;d[i+1]=g+n;d[i+2]=b+n}
+  fxCtx.putImageData(id,0,0);
+  const q=document.createElement('canvas');q.width=w;q.height=h;const s2=Math.max(.15,1-S*.85);const tw=Math.max(8,Math.round(w*s2)),th=Math.max(8,Math.round(h*s2));
+  q.width=tw;q.height=th;q.getContext('2d').drawImage(fxCv,0,0,tw,th);fxCtx.imageSmoothingEnabled=false;fxCtx.drawImage(q,0,0,w,h);fxCtx.imageSmoothingEnabled=true}
+ drawCaps(w,h);
+}
+function drawCaps(w,h){const t=$('#capTop').value.trim().toUpperCase(),b=$('#capBot').value.trim().toUpperCase();if(!t&&!b)return;
+ const fs=Math.round(Math.min(w,h)*.11);
+ const put=(txt,top)=>{let size=fs;fxCtx.font=`900 ${size}px Impact,"Arial Black","Helvetica Neue",Arial,sans-serif`;
+  const words=txt.split(/\s+/);const lines=[];let line='';const maxW=w*.92;
+  for(const wd of words){const test=line?line+' '+wd:wd;if(fxCtx.measureText(test).width>maxW&&line){lines.push(line);line=wd}else line=test}lines.push(line);
+  for(;size>14;size-=2){fxCtx.font=`900 ${size}px Impact,"Arial Black","Helvetica Neue",Arial,sans-serif`;if(Math.max(...lines.map(l=>fxCtx.measureText(l).width))<=maxW)break}
+  fxCtx.textAlign='center';fxCtx.lineJoin='round';fxCtx.lineWidth=Math.max(3,size/7);fxCtx.strokeStyle='#000';fxCtx.fillStyle='#fff';
+  const lh=size*1.08;lines.forEach((l,i)=>{const y=top?size*.15+lh*(i+1)-size*.12:h-size*.25-lh*(lines.length-1-i);fxCtx.textBaseline='alphabetic';fxCtx.strokeText(l,w/2,y);fxCtx.fillText(l,w/2,y)})};
+ if(t)put(t,true);if(b)put(b,false)}
+function fxBlob(){return new Promise(r=>fxCv.toBlob(r,'image/jpeg',.92))}
+$('#fxShare').onclick=async()=>{if(!fxBase)return;const b=await fxBlob();await savePic(b,'Прикол','fx');shareBlob(b)};
+$('#fxToAi').onclick=async()=>{if(!fxBase)return;const b=await fxBlob();setAiSource(b);go('p-ai')};
+
+/* ---------- service worker ---------- */
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
